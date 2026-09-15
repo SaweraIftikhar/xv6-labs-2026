@@ -54,6 +54,7 @@ void panic(char *);
 struct cmd *parsecmd(char *);
 void runcmd(struct cmd *) __attribute__((noreturn));
 
+int bgcount=0;
 // Execute cmd.  Never returns.
 void
 runcmd(struct cmd *cmd)
@@ -148,7 +149,6 @@ main(void)
   static char buf[100];
   int fd;
 
-  // Ensure that three file descriptors are open.
   while ((fd = open("console", O_RDWR)) >= 0) {
     if (fd >= 3) {
       close(fd);
@@ -156,26 +156,53 @@ main(void)
     }
   }
 
-  // Read and run input commands.
   while (getcmd(buf, sizeof(buf)) >= 0) {
     char *cmd = buf;
+
     while (*cmd == ' ' || *cmd == '\t')
       cmd++;
-    if (*cmd == '\n') // is a blank command
+
+    if (*cmd == '\n')
       continue;
+
+    int len = strlen(cmd);
+
+    if (len > 0 && cmd[len - 1] == '\n') {
+      cmd[len - 1] = 0;
+      len--;
+    }
+
     if (cmd[0] == 'c' && cmd[1] == 'd' && cmd[2] == ' ') {
-      // Chdir must be called by the parent, not the child.
-      cmd[strlen(cmd) - 1] = 0; // chop \n
       if (chdir(cmd + 3) < 0)
         fprintf(2, "cannot cd %s\n", cmd + 3);
-    } else {
+    }
+    else if (strcmp(cmd, "wait") == 0) {
+      while (bgcount > 0) {
+        wait(0);
+        bgcount--;
+      }
+    }
+    else {
+      int background = 0;
+
+      if (len > 0 && cmd[len - 1] == '&') {
+        background = 1;
+        cmd[len - 1] = 0;
+      }
+
       if (fork1() == 0)
         runcmd(parsecmd(cmd));
-      wait(0);
+
+      if (background)
+        bgcount++;
+      else
+        wait(0);
     }
   }
+
   exit(0);
 }
+
 
 void
 panic(char *s)
