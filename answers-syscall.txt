@@ -27,3 +27,7 @@ not mapped in the kernel address space, so accessing it
 causes a page fault. This is confirmed by scause = 0xd, 
 which means Load Page Fault. stval = 0x0 also shows that 
 the faulting address was 0.
+
+Q6: What was the name of the process that was running when the
+kernel panicked? What was its process id (pid)?
+The process was init, and its PID was 1.
