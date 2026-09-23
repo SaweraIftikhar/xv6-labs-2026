@@ -1,0 +1,29 @@
+Q1: Which function called syscall?
+usertrap() called syscall(), from kernel/trap.c:68.
+
+Q2: What is p->trapframe->a7 and what does it represent?
+a7 = 15 = SYS_open. This is init calling open("console",
+ O_RDWR) to set up file descriptor 0 before exec'ing
+ the shell.
+
+Q3: What was the previous mode the CPU was in?
+sstatus = 0x200000022. Bit 8 (SPP) = 0, which means 
+the previous mode was User mode — matches the fact that
+init (a user program) made the ecall that triggered
+this trap.
+
+Q4: What assembly instruction is the kernel panicking
+at, and which register corresponds to num?
+The kernel is panicking at 0x80001ce2:
+lw a3,0(zero)
+This instruction tries to load a word from address 0 into
+register a3. Therefore, the variable num corresponds to 
+register a3.
+
+Q5: Why does the kernel crash?
+The kernel crashes because the instruction lw a3,0(zero) 
+tries to load a value from virtual address 0. Address 0 is 
+not mapped in the kernel address space, so accessing it 
+causes a page fault. This is confirmed by scause = 0xd, 
+which means Load Page Fault. stval = 0x0 also shows that 
+the faulting address was 0.
