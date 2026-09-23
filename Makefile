@@ -204,7 +204,8 @@ UPROGS=\
 	$U/_dorphan\
 	$U/_sync\
         $U/_freememtest\
-
+        $U/_sandbox\
+        $U/_sbtest\
 
 
 ifeq ($(LAB),syscall)

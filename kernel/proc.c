@@ -277,7 +277,7 @@ kfork(void)
 
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
-
+  np->interpose_mask = p->interpose_mask;
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
 

@@ -49,4 +49,4 @@ void printf(const char *, ...) __attribute__((format(printf, 1, 2)));
 void *malloc(uint);
 void free(void *);
 int freemem(void);
-
+int interpose(int mask, char *path);
